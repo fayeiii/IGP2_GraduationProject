@@ -1,0 +1,101 @@
+{
+  "scenario": {
+    "map_path": "scenarios\\maps\\MyTown3_0.xodr",
+    "max_speed": 15.0,
+    "fps": 20,
+    "seed": 42,
+    "max_steps": 1000,
+    "n_traffic": 1
+  },
+  "agents": [
+    {
+      "id": 0,
+      "type": "MCTSAgent",
+      "spawn": {
+        "box": {
+          "center": [
+            -9.2,
+            -23.0
+          ],
+          "length": 3.5,
+          "width": 2.0,
+          "heading":4.71
+        },
+        "velocity": [
+          5.0,
+          10.0
+        ]
+      },
+      "goal": {
+        "box": {
+          "center": [
+            48.0,
+            -279.0
+          ],
+          "length": 3.5,
+          "width": 3.5,
+          "heading": 0.0
+        }
+      },
+      "velocity_smoother": {},
+      "goal_recognition": {},
+      "cost_factors": {
+        "time": 1.0,
+        "velocity": 0.0,
+        "acceleration": 0.0,
+        "jerk": 1.0,
+        "heading": 1.0,
+        "angular_velocity": 1.0,
+        "angular_acceleration": 0.0,
+        "curvature": 0.0,
+        "safety": 0.0
+      },
+      "mcts": {
+        "t_update": 2.0,
+        "n_simulations": 30,
+        "max_depth": 5,
+        "store_results": "all",
+        "trajectory_agents": false,
+        "reward_factors": {
+          "time": 1.0,
+          "jerk": -0.1,
+          "angular_velocity": -0.1,
+          "curvature": -0.1
+        }
+      },
+      "view_radius": 100,
+      "stop_goals": false
+    },
+    {
+      "id": 1,
+      "type": "TrafficAgent",
+      "spawn": {
+        "box": {
+          "center": [
+            -205.0,
+            -230.0
+          ],
+          "length": 3.5,
+          "width": 3.5,
+          "heading": 4.71
+        },
+        "velocity": [
+          5.0,
+          10.0
+        ]
+      },
+      "goal": {
+        "box": {
+          "center": [
+            -160.0,
+            -278.8
+          ],
+          "length": 3.5,
+          "width": 3.5,
+          "heading": 0.0
+        }
+      },
+      "macro_actions": []
+    }
+  ]
+}
