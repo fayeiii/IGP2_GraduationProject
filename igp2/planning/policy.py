@@ -41,9 +41,8 @@ class UCB1(Policy):
 
     def select(self, node: Node):
         with np.errstate(divide="ignore"):
-            if node.action_visits.any() == 0:
-                idx = (node.action_visits == 0).argmax()
-                return node.actions[idx], idx
+            if not node.action_visits.any():
+                return node.actions[0], 0
             values = node.q_values + self.c * np.sqrt(np.log(node.state_visits) / node.action_visits)
             idx = np.argmax(values)
             return node.actions[idx], idx

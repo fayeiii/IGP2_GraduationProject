@@ -9,7 +9,7 @@ from igp2.core.trajectory import Trajectory, VelocityTrajectory
 from igp2.core.velocitysmoother import VelocitySmoother
 from igp2.core.cost import Cost
 from igp2.core.agentstate import AgentState
-from igp2.core.goal import Goal, StoppingGoal
+from igp2.core.goal import Goal, StoppingGoal, PointCollectionGoal
 from igp2.core.util import Circle
 from igp2.opendrive.map import Map
 from igp2.recognition.astar import AStar

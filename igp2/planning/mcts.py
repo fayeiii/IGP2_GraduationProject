@@ -9,6 +9,7 @@ from igp2.planning.rollout import Rollout
 from igp2.planning.node import Node
 from igp2.planning.mctsaction import MCTSAction
 from igp2.planning.reward import Reward
+from igp2.planlibrary.macro_action import ChangeLane, ChangeLaneRight, ChangeLaneLeft
 from igp2.core.util import copy_agents_dict
 
 logger = logging.getLogger(__name__)
@@ -124,10 +125,10 @@ class MCTS:
             tree.set_samples(samples)
             final_key = self._run_simulation(agent_id, goal, tree, simulator, debug)
 
-            if self.store_results == "all":
-                logger.debug(f"Storing MCTS search results for iteration {k}.")
-                mcts_result = ip.MCTSResult(copy.deepcopy(tree), samples, final_key)
-                self.results.add_data(mcts_result)
+            # if self.store_results == "all":
+            #     logger.debug(f"Storing MCTS search results for iteration {k}.")
+            #     mcts_result = ip.MCTSResult(copy.deepcopy(tree), samples, final_key)
+            #     self.results.add_data(mcts_result)
 
             simulator.reset()
             self.reward.reset()
@@ -172,7 +173,8 @@ class MCTS:
 
                 collided_agents_ids = [col.agent_id for col in collisions]
                 if self.store_results is not None:
-                    agents_copy = copy_agents_dict(simulator.agents, agent_id)
+                    # agents_copy = copy_agents_dict(simulator.agents, agent_id)
+                    agents_copy = {}
                     node.run_result = ip.RunResult(
                         agents_copy,
                         simulator.ego_id,
@@ -184,7 +186,8 @@ class MCTS:
                 # 10-16. Reward computation
                 r = self.reward(collisions=collisions,
                                 alive=alive,
-                                ego_trajectory=simulator.agents[agent_id].trajectory_cl if goal_reached else None,
+                                ego_trajectory=simulator.agents[agent_id].trajectory_cl, #if goal_reached else None,
+                                goal_reached=goal_reached,
                                 goal=goal,
                                 depth_reached=depth == self.d_max - 1)
                 if r is not None:
@@ -229,6 +232,11 @@ class MCTS:
         """
         actions = []
         for macro_action in ip.MacroActionFactory.get_applicable_actions(frame[agent_id], self.scenario_map):
+            if len(key) and "ChangeLane" in key[-1] and isinstance(macro_action, ChangeLane):
+              l1 = "Left" in key[-1]
+              l2 = isinstance(macro_action, ChangeLaneLeft)
+              if l1!=l2:
+                    continue
             for ma_args in macro_action.get_possible_args(frame[agent_id], self.scenario_map, goal):
                 actions.append(self.action_type(macro_action, ma_args))
 

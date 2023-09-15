@@ -1,11 +1,11 @@
 {
   "scenario": {
-    "map_path": "scenarios/maps/Town01.xodr",
-    "max_speed": 10.0,
+    "map_path": "scenarios\\maps\\MyTown3_1.xodr",
+    "max_speed": 15.0,
     "fps": 20,
-    "seed": 21,
+    "seed": 42,
     "max_steps": 1000,
-    "n_traffic": 5
+    "n_traffic": 0
   },
   "agents": [
     {
@@ -14,12 +14,12 @@
       "spawn": {
         "box": {
           "center": [
-            92.4,
-            -101.1
+            5.3,
+            -23.0
           ],
           "length": 3.5,
-          "width": 10.0,
-          "heading": 0.0
+          "width": 3.5,
+          "heading": 4.71
         },
         "velocity": [
           5.0,
@@ -29,21 +29,23 @@
       "goal": {
         "box": {
           "center": [
-            310.0,
-            -326.5
+            1.5,
+            280.0
           ],
-          "length": 5,
+          "length": 3.5,
           "width": 3.5,
-          "heading": 0.0
+          "heading": 1.57
         }
       },
+      "velocity_smoother": {},
+      "goal_recognition": {},
       "cost_factors": {
-        "time": 0.5,
+        "time": 1.0,
         "velocity": 0.0,
         "acceleration": 0.0,
         "jerk": 1.0,
-        "heading": 0.0,
-        "angular_velocity": 0.0,
+        "heading": 1.0,
+        "angular_velocity": 1.0,
         "angular_acceleration": 0.0,
         "curvature": 0.0,
         "safety": 0.0
@@ -51,16 +53,18 @@
       "mcts": {
         "t_update": 2.0,
         "n_simulations": 30,
+        "max_depth": 5,
         "store_results": "final",
         "trajectory_agents": false,
         "reward_factors": {
           "time": 1.0,
-          "jerk": -1.0,
+          "jerk": -0.1,
           "angular_velocity": -0.1,
-          "curvature": 0.0
+          "curvature": -0.1
         }
       },
-      "view_radius": 100
+      "view_radius": 100,
+      "stop_goals": false
     }
   ]
 }

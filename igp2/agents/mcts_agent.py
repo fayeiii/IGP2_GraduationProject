@@ -134,6 +134,9 @@ class MCTSAgent(TrafficAgent):
             frame=frame,
             meta=agents_metadata,
             predictions=self._goal_probabilities)
+        # reset the count of macro actions
+        self._current_macro_id = 0
+
 
     def next_action(self, observation: Observation) -> Action:
         """ Returns the next action for the agent.

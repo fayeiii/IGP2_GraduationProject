@@ -14,7 +14,7 @@ from igp2.core.trajectory import VelocityTrajectory
 from igp2.core.agentstate import AgentState
 from igp2.core.goal import PointGoal, Goal, StoppingGoal
 from igp2.core.util import Circle, add_offset_point
-from igp2.planlibrary.macro_action import MacroAction, MacroActionConfig, MacroActionFactory, StopMA
+from igp2.planlibrary.macro_action import MacroAction, MacroActionConfig, MacroActionFactory, StopMA, ChangeLaneLeft, ChangeLaneRight, ChangeLane
 from igp2.planlibrary.maneuver import Maneuver
 
 logger = logging.getLogger(__name__)
@@ -116,11 +116,18 @@ class AStar:
                         config = MacroActionConfig(ma_args)
                         new_ma = macro_action(config, agent_id=agent_id, frame=frame, scenario_map=scenario_map)
 
+                        if len(actions) and isinstance(actions[-1], ChangeLane) and isinstance(new_ma, ChangeLane):
+                            cl1 = isinstance(actions[-1], ChangeLaneLeft)
+                            cl2 = isinstance(new_ma, ChangeLaneLeft)
+                            if cl1 != cl2:
+                                continue
+
                         new_actions = actions + [new_ma]
                         new_trajectory = self._full_trajectory(new_actions)
+                        last_trajectory = new_ma.get_trajectory()
 
-                        # Check if has passed through region and went outside region already
-                        if not self._check_in_region(new_trajectory, visible_region):
+                        #Check if has passed through region and went outside region already
+                        if not self._check_in_region(last_trajectory, visible_region):
                             continue
 
                         new_frame = MacroAction.play_forward_macro_action(agent_id, scenario_map, frame, new_ma)
@@ -196,7 +203,8 @@ class AStar:
         dists = np.linalg.norm(trajectory.path[:-1] - visible_region.centre, axis=1)  # remove ending off offset point
         in_region = dists <= visible_region.radius + 1  # Add 1m for error
         if True in in_region:
-            first_in_idx = np.nonzero(in_region)[0][0]
-            in_region = in_region[first_in_idx:]
-            return np.all(in_region)
-        return True
+            # first_in_idx = np.nonzero(in_region)[0][0]
+            # in_region = in_region[first_in_idx:]
+            # return np.all(in_region)
+            return True
+        return False

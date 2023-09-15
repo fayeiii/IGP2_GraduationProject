@@ -319,6 +319,28 @@ class Map(object):
                             angle_diff = np.abs(heading - angle)
                         if best is None or best[0] > angle_diff + distance:
                             best = (angle_diff + distance, lane)
+        if best is None:
+            roads = self.roads_at(point)
+            for road_new in roads:
+                if road_new == road:
+                    continue
+                else:
+                    _, original_angle = road_new.plan_view.calc(road_new.midline.project(point))
+                    for lane_section in road_new.lanes.lane_sections:
+                        for lane in lane_section.all_lanes:
+                            if lane.boundary is not None and lane.id != 0 and (
+                                    not drivable_only or lane.type == LaneTypes.DRIVING):
+                                distance = lane.boundary.distance(point)
+                                if distance < max_distance:
+                                    angle_diff = 0.0
+                                    if heading is not None:
+                                        if lane.id > 0:
+                                            angle = normalise_angle(original_angle + np.pi)
+                                        else:
+                                            angle = original_angle
+                                        angle_diff = np.abs(heading - angle)
+                                    if best is None or best[0] > angle_diff + distance:
+                                        best = (angle_diff + distance, lane)
 
         return best[1] if best is not None else None
 

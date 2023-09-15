@@ -3,9 +3,11 @@ from typing import Dict, List
 import logging
 import numpy as np
 
-from igp2.core.trajectory import StateTrajectory
+from igp2.core.trajectory import StateTrajectory, VelocityTrajectory
 from igp2.core.goal import Goal
 from igp2.core.cost import Cost
+from igp2.planlibrary.macro_action import MacroAction
+from igp2.core.util import add_offset_point
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +48,10 @@ class Reward:
         self._components = None
         self._reward = None
         self.reset()
+        self._g = Reward.trajectory_duration
+        self._h = Reward.time_to_goal
+        self._h_factor = 1.5
+        self._f = self.cost_function
 
     def __call__(self, *args, **kwargs):
         return self._calc_reward(*args, **kwargs)
@@ -54,6 +60,7 @@ class Reward:
                      collisions: List["Agent"] = None,
                      alive: bool = True,
                      ego_trajectory: StateTrajectory = None,
+                     goal_reached: bool = False,
                      goal: Goal = None,
                      depth_reached: bool = False
                      ) -> float:
@@ -65,17 +72,30 @@ class Reward:
             self._reward = self._factors.get("dead", 1.) * self._default_rewards["dead"]
             self._components["dead"] = self._reward
             logger.debug(f"Ego died during rollout!")
-        elif ego_trajectory is not None and goal is not None:
+        #elif ego_trajectory is not None and goal is not None:
+        elif goal_reached and goal is not None:
             trajectory_rewards = self.trajectory_reward(ego_trajectory, goal)
             self._reward = sum([self._factors[comp] * rew for comp, rew in trajectory_rewards.items()])
             self._components.update(trajectory_rewards)
             logger.debug(f"Goal reached!")
         elif depth_reached:
-            self._reward = self._factors.get("term", 1.) * self._default_rewards["term"]
+            if isinstance(ego_trajectory, StateTrajectory):
+                trajectory = VelocityTrajectory(ego_trajectory.path, ego_trajectory.velocity,
+                                                ego_trajectory.heading, ego_trajectory.timesteps)
+            self._reward = 20 / self._f(trajectory, goal)
+            # self._reward = self._factors.get("term", 1.) * self._default_rewards["term"]
             self._components["term"] = self._reward
             logger.debug("Reached final rollout depth!")
 
         return self._reward
+
+    @staticmethod
+    def trajectory_duration(trajectory: VelocityTrajectory, goal: Goal) -> float:
+        return trajectory.duration
+
+    @staticmethod
+    def time_to_goal(trajectory: VelocityTrajectory, goal: Goal) -> float:
+        return goal.distance(trajectory.path[-1]) / 10
 
     def trajectory_reward(self, trajectory: StateTrajectory, goal: Goal) -> Dict[str, float]:
         """ Calculate reward components for a given trajectory. """
@@ -126,3 +146,6 @@ class Reward:
     def factors(self) -> Dict[str, float]:
         """ Reward component factors. """
         return self._factors
+
+    def cost_function(self, trajectory: VelocityTrajectory, goal: Goal) -> float:
+        return self._g(trajectory, goal) + self._h_factor*self._h(trajectory, goal)

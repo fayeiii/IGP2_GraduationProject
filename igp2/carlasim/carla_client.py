@@ -13,6 +13,7 @@ import logging
 from carla import Transform, Location, Rotation, Vector3D
 from igp2.opendrive import Map
 from igp2.agents.agent import Agent
+from igp2.agents.mcts_agent import MCTSAgent
 from igp2.carlasim.traffic_manager import TrafficManager
 from igp2.carlasim.carla_agent_wrapper import CarlaAgentWrapper
 from igp2.core.vehicle import Observation
@@ -259,6 +260,10 @@ class CarlaSim:
         commands = []
         controls = {}
         for agent_id, agent in self.agents.items():
+            # if isinstance(agent, MCTSAgent):
+            #     mcts_id = agent_id
+            #     mcts_agent = agent
+            #     continue
             if agent is None:
                 continue
 
@@ -269,6 +274,14 @@ class CarlaSim:
             controls[agent_id] = control
             command = carla.command.ApplyVehicleControl(agent.actor, control)
             commands.append(command)
+
+        # control = mcts_agent.next_control(observation)
+        # if control is None:
+        #     self.remove_agent(mcts_agent.mcts_id)
+        # else:
+        #     controls[mcts_id] = control
+        #     command = carla.command.ApplyVehicleControl(mcts_agent.actor, control)
+        #     commands.append(command)
 
         self.__client.apply_batch_sync(commands)
         return controls

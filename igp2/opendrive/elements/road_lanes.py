@@ -183,6 +183,23 @@ class LaneTypes:
     ]
 
 
+class LaneDic:
+    def __init__(self, lane):
+        self._parent_road_id = lane.parent_road.id
+        self._lane_id = lane.id
+        for n, i in enumerate(lane.parent_road.lanes.lane_sections):
+            if i == lane.lane_section:
+                self._section = n
+
+    def get_lane(self, scenario_map) -> "Lane":
+        lanes = scenario_map.roads[self._parent_road_id].lanes.lane_sections[self._section].all_lanes
+        for i in lanes:
+            if i.id == self._lane_id:
+                return i
+
+        return None
+
+
 class Lane:
     """ Represent a single Lane of a LaneSection in the OpenDrive standard """
 
@@ -509,6 +526,13 @@ class Lane:
         neighbours = [l for l in neighbours if l.type == LaneTypes.DRIVING]
         return neighbours
 
+    def get_lanedic(self) -> "LaneDic":
+        return LaneDic(self)
+
+
+def get_list_lanes(listlane:List[LaneDic], map) ->List[Lane]:
+    return [i.get_lane(map)for i in listlane]
+
 
 class LaneLink:
     """ Represent a Link between two Lanes in separate LaneSections """
@@ -667,3 +691,5 @@ class Lanes:
         if num_lane_sections > 1:
             return num_lane_sections - 1
         return 0
+
+

@@ -15,5 +15,8 @@ class MCTSAction:
         self.ma_args = ma_args
 
     def __repr__(self):
-        args_str = str(self.ma_args)[1:-1].replace("\'", "").replace("array", "")
+        if "target_sequence" in self.ma_args.keys():
+            args_str = str(self.ma_args["target_sequence"][0]._parent_road_id)+ ":" + str(self.ma_args["target_sequence"][0]._lane_id)
+        else:
+            args_str = str(self.ma_args)[1:-1].replace("\'", "").replace("array", "")
         return f"{self.macro_action_type.__name__}({args_str})"

@@ -161,3 +161,7 @@ class PointCollectionGoal(Goal):
     def goals(self) -> List[PointGoal]:
         """ Return the list of PointGoals in this goal collection."""
         return self._goals
+
+    @property
+    def radius(self) -> float:
+        return np.mean([g.radius for g in self._goals]) + 0.5

@@ -1,7 +1,7 @@
 import logging
 import os.path
 import sys
-sys.setrecursionlimit(10000)
+sys.setrecursionlimit(100000)
 
 import igp2 as ip
 import numpy as np
